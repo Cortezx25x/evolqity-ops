@@ -14,7 +14,10 @@ import {
 export async function registerOrganizationRoutes(
   app: FastifyInstance,
 ): Promise<void> {
-  app.post('/api/organizations', async (request, reply) => {
+  app.post(
+    '/api/organizations',
+    { preHandler: app.authenticate },
+    async (request, reply) => {
     const parsedBody = createOrganizationBodySchema.safeParse(request.body);
 
     if (!parsedBody.success) {
@@ -41,9 +44,13 @@ export async function registerOrganizationRoutes(
 
       return reply.code(500).send({ message: 'Internal server error' });
     }
-  });
+    },
+  );
 
-  app.get('/api/organizations', async (request, reply) => {
+  app.get(
+    '/api/organizations',
+    { preHandler: app.authenticate },
+    async (request, reply) => {
     try {
       const organizations = await listActiveOrganizations();
 
@@ -53,9 +60,13 @@ export async function registerOrganizationRoutes(
 
       return reply.code(500).send({ message: 'Internal server error' });
     }
-  });
+    },
+  );
 
-  app.get('/api/organizations/:id', async (request, reply) => {
+  app.get(
+    '/api/organizations/:id',
+    { preHandler: app.authenticate },
+    async (request, reply) => {
     const parsedParams = organizationIdParamsSchema.safeParse(request.params);
 
     if (!parsedParams.success) {
@@ -75,5 +86,6 @@ export async function registerOrganizationRoutes(
 
       return reply.code(500).send({ message: 'Internal server error' });
     }
-  });
+    },
+  );
 }

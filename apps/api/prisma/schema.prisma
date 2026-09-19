@@ -26,15 +26,17 @@ model Organization {
 }
 
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  firstName    String?
+  lastName     String?
+  passwordHash String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   organizations OrganizationUser[] @relation("UserMemberships")
+  sessions      AuthSession[]
 }
 
 model OrganizationUser {
@@ -52,4 +54,41 @@ model OrganizationUser {
   @@unique([organizationId, userId])
   @@index([organizationId])
   @@index([userId])
+}
+
+model AuthSession {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @db.Uuid
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  revokedReason String?
+  lastUsedAt    DateTime?
+  userAgent     String?
+  createdIp     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model RefreshToken {
+  id                String    @id @default(uuid()) @db.Uuid
+  sessionId         String    @db.Uuid
+  tokenHash         Bytes     @unique
+  expiresAt         DateTime
+  usedAt            DateTime?
+  revokedAt         DateTime?
+  replacedByTokenId String?   @unique @db.Uuid
+  createdAt         DateTime  @default(now())
+
+  session    AuthSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  replacedBy RefreshToken? @relation("RefreshTokenRotation", fields: [replacedByTokenId], references: [id])
+  replaces   RefreshToken? @relation("RefreshTokenRotation")
+
+  @@index([sessionId, revokedAt])
+  @@index([expiresAt])
 }

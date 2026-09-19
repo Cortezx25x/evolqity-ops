@@ -1,0 +1,36 @@
+import { z } from 'zod';
+
+const normalizedEmail = z
+  .string()
+  .trim()
+  .transform((value) => value.toLowerCase())
+  .pipe(z.email());
+
+const optionalTrimmedString = z
+  .string()
+  .trim()
+  .optional()
+  .transform((value) => (value === '' ? undefined : value));
+
+export const registerBodySchema = z.object({
+  email: normalizedEmail,
+  password: z.string().min(10).max(128),
+  firstName: optionalTrimmedString,
+  lastName: optionalTrimmedString,
+  organizationName: z.string().trim().min(2),
+  organizationSlug: z
+    .string()
+    .trim()
+    .transform((value) => value.toLowerCase())
+    .pipe(z.string().min(2).regex(/^[a-z0-9-]+$/)),
+  organizationType: optionalTrimmedString,
+});
+
+export type RegisterBody = z.infer<typeof registerBodySchema>;
+
+export const loginBodySchema = z.object({
+  email: normalizedEmail,
+  password: z.string().min(1).max(128),
+});
+
+export type LoginBody = z.infer<typeof loginBodySchema>;

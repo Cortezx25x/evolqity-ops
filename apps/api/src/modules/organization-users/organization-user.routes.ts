@@ -17,6 +17,7 @@ export async function registerOrganizationUserRoutes(
 ): Promise<void> {
   app.post(
     '/api/organizations/:organizationId/members',
+    { preHandler: app.authenticate },
     async (request, reply) => {
       const parsedParams = organizationIdParamsSchema.safeParse(
         request.params,
@@ -70,6 +71,7 @@ export async function registerOrganizationUserRoutes(
 
   app.get(
     '/api/organizations/:organizationId/members',
+    { preHandler: app.authenticate },
     async (request, reply) => {
       const parsedParams = organizationIdParamsSchema.safeParse(
         request.params,

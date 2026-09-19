@@ -1,19 +1,9 @@
-import 'dotenv/config';
-
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client.js';
+import { env } from '../config/env.js';
 
 function createPrismaClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
-
-  if (connectionString === undefined || connectionString.trim() === '') {
-    console.error(
-      'DATABASE_URL environment variable is required but was not set.',
-    );
-    process.exit(1);
-  }
-
-  const adapter = new PrismaPg(connectionString);
+  const adapter = new PrismaPg(env.DATABASE_URL);
 
   return new PrismaClient({ adapter });
 }
@@ -24,6 +14,6 @@ const globalForPrisma = globalThis as typeof globalThis & {
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== 'production') {
+if (env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;
 }

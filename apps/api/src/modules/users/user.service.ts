@@ -2,6 +2,16 @@ import { prisma } from '../../lib/prisma.js';
 import { Prisma } from '../../generated/prisma/client.js';
 import type { CreateUserBody } from './user.schemas.js';
 
+const publicUserSelect = {
+  id: true,
+  email: true,
+  firstName: true,
+  lastName: true,
+  active: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
 export class UserEmailExistsError extends Error {
   constructor() {
     super('User email already exists');
@@ -24,6 +34,7 @@ export async function createUser(input: CreateUserBody) {
         firstName: input.firstName ?? null,
         lastName: input.lastName ?? null,
       },
+      select: publicUserSelect,
     });
   } catch (error) {
     if (isEmailUniqueViolation(error)) {
@@ -37,5 +48,6 @@ export async function createUser(input: CreateUserBody) {
 export async function getUserById(id: string) {
   return prisma.user.findUnique({
     where: { id },
+    select: publicUserSelect,
   });
 }

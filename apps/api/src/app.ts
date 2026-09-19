@@ -1,0 +1,121 @@
+import cookie from '@fastify/cookie';
+import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
+import jwt from '@fastify/jwt';
+import rateLimit from '@fastify/rate-limit';
+import Fastify from 'fastify';
+
+import { env } from './config/env.js';
+import { prisma } from './lib/prisma.js';
+import { registerAuthRoutes } from './modules/auth/auth.routes.js';
+import { registerOrganizationUserRoutes } from './modules/organization-users/organization-user.routes.js';
+import { registerOrganizationRoutes } from './modules/organizations/organization.routes.js';
+import { registerUserRoutes } from './modules/users/user.routes.js';
+import { registerAuthenticationPlugin } from './plugins/authentication.js';
+
+export interface BuildAppOptions {
+  logger?: boolean;
+}
+
+const redactedLogPaths = [
+  'req.headers.authorization',
+  'req.headers.cookie',
+  'request.headers.authorization',
+  'request.headers.cookie',
+  'headers.authorization',
+  'headers.cookie',
+  'body.password',
+  'body.passwordHash',
+  'body.refreshToken',
+  'body.accessToken',
+  'req.body.password',
+  'req.body.passwordHash',
+  'req.body.refreshToken',
+  'req.body.accessToken',
+];
+
+export async function buildApp(options: BuildAppOptions = {}) {
+  const app = Fastify({
+    trustProxy: env.TRUST_PROXY,
+    logger:
+      options.logger === false
+        ? false
+        : {
+            redact: {
+              paths: redactedLogPaths,
+              censor: '[REDACTED]',
+            },
+          },
+  });
+
+  app.addHook('onRequest', async (request, reply) => {
+    const origin = request.headers.origin;
+
+    if (origin !== undefined && !env.CORS_ORIGINS.includes(origin)) {
+      await reply.code(403).send({ message: 'Origin not allowed' });
+    }
+  });
+
+  await app.register(cors, {
+    credentials: true,
+    origin(origin, callback) {
+      if (origin === undefined || env.CORS_ORIGINS.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(null, false);
+    },
+  });
+  await app.register(helmet);
+  await app.register(cookie);
+  await app.register(jwt, {
+    secret: env.AUTH_ACCESS_TOKEN_SECRET,
+    sign: {
+      expiresIn: env.AUTH_ACCESS_TOKEN_TTL_SECONDS,
+      iss: env.AUTH_JWT_ISSUER,
+      aud: env.AUTH_JWT_AUDIENCE,
+    },
+    verify: {
+      allowedIss: env.AUTH_JWT_ISSUER,
+      allowedAud: env.AUTH_JWT_AUDIENCE,
+    },
+  });
+  await app.register(rateLimit, {
+    global: false,
+  });
+  await registerAuthenticationPlugin(app);
+
+  app.get('/api/health', async () => ({
+    status: 'ok',
+    service: 'evolqity-ops-api',
+  }));
+
+  app.get('/api/ready', async (_request, reply) => {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+
+      return reply.code(200).send({
+        status: 'ready',
+        database: 'connected',
+      });
+    } catch (error) {
+      app.log.error(error);
+
+      return reply.code(503).send({
+        status: 'not_ready',
+        database: 'disconnected',
+      });
+    }
+  });
+
+  await registerAuthRoutes(app);
+
+  // These CRUD routes require authentication only. Tenant isolation and
+  // organization-level authorization are intentionally deferred.
+  await registerOrganizationRoutes(app);
+  await registerUserRoutes(app);
+  await registerOrganizationUserRoutes(app);
+
+  return app;
+}

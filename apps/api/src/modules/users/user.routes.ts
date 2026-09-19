@@ -8,7 +8,10 @@ import {
 } from './user.service.js';
 
 export async function registerUserRoutes(app: FastifyInstance): Promise<void> {
-  app.post('/api/users', async (request, reply) => {
+  app.post(
+    '/api/users',
+    { preHandler: app.authenticate },
+    async (request, reply) => {
     const parsedBody = createUserBodySchema.safeParse(request.body);
 
     if (!parsedBody.success) {
@@ -35,9 +38,13 @@ export async function registerUserRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.code(500).send({ message: 'Internal server error' });
     }
-  });
+    },
+  );
 
-  app.get('/api/users/:id', async (request, reply) => {
+  app.get(
+    '/api/users/:id',
+    { preHandler: app.authenticate },
+    async (request, reply) => {
     const parsedParams = userIdParamsSchema.safeParse(request.params);
 
     if (!parsedParams.success) {
@@ -57,5 +64,6 @@ export async function registerUserRoutes(app: FastifyInstance): Promise<void> {
 
       return reply.code(500).send({ message: 'Internal server error' });
     }
-  });
+    },
+  );
 }
