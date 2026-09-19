@@ -5,7 +5,9 @@ import helmet from '@fastify/helmet';
 import Fastify from 'fastify';
 
 import { prisma } from './lib/prisma.js';
+import { registerOrganizationUserRoutes } from './modules/organization-users/organization-user.routes.js';
 import { registerOrganizationRoutes } from './modules/organizations/organization.routes.js';
+import { registerUserRoutes } from './modules/users/user.routes.js';
 
 const DEFAULT_PORT = 3001;
 const DEFAULT_HOST = '127.0.0.1';
@@ -42,6 +44,8 @@ async function buildApp() {
   }));
 
   await registerOrganizationRoutes(app);
+  await registerUserRoutes(app);
+  await registerOrganizationUserRoutes(app);
 
   app.get('/api/ready', async (_request, reply) => {
     try {
