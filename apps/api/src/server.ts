@@ -4,6 +4,8 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import Fastify from 'fastify';
 
+import { prisma } from './lib/prisma.js';
+
 const DEFAULT_PORT = 3001;
 const DEFAULT_HOST = '127.0.0.1';
 
@@ -38,11 +40,53 @@ async function buildApp() {
     service: 'evolqity-ops-api',
   }));
 
+  app.get('/api/ready', async (_request, reply) => {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+
+      return reply.code(200).send({
+        status: 'ready',
+        database: 'connected',
+      });
+    } catch (error) {
+      app.log.error(error);
+
+      return reply.code(503).send({
+        status: 'not_ready',
+        database: 'disconnected',
+      });
+    }
+  });
+
+  app.addHook('onClose', async () => {
+    await prisma.$disconnect();
+  });
+
   return app;
 }
 
 async function start() {
   const app = await buildApp();
+
+  const shutdown = async (signal: string) => {
+    app.log.info(`Received ${signal}, shutting down`);
+
+    try {
+      await app.close();
+      process.exit(0);
+    } catch (error) {
+      app.log.error(error);
+      process.exit(1);
+    }
+  };
+
+  process.once('SIGINT', () => {
+    void shutdown('SIGINT');
+  });
+
+  process.once('SIGTERM', () => {
+    void shutdown('SIGTERM');
+  });
 
   try {
     await app.listen({ port: PORT, host: HOST });
