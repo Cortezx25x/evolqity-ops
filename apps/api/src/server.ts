@@ -5,6 +5,7 @@ import helmet from '@fastify/helmet';
 import Fastify from 'fastify';
 
 import { prisma } from './lib/prisma.js';
+import { registerOrganizationRoutes } from './modules/organizations/organization.routes.js';
 
 const DEFAULT_PORT = 3001;
 const DEFAULT_HOST = '127.0.0.1';
@@ -39,6 +40,8 @@ async function buildApp() {
     status: 'ok',
     service: 'evolqity-ops-api',
   }));
+
+  await registerOrganizationRoutes(app);
 
   app.get('/api/ready', async (_request, reply) => {
     try {
