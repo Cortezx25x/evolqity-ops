@@ -129,6 +129,8 @@ describe('multitenant isolation', () => {
   beforeEach(async () => {
     await prisma.refreshToken.deleteMany();
     await prisma.authSession.deleteMany();
+    await prisma.asset.deleteMany();
+    await prisma.customer.deleteMany();
     await prisma.organizationUser.deleteMany();
     await prisma.organization.deleteMany();
     await prisma.user.deleteMany();

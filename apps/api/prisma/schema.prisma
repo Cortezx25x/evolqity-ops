@@ -18,6 +18,13 @@ enum CustomerType {
   COMPANY
 }
 
+enum AssetType {
+  VEHICLE
+  EQUIPMENT
+  DEVICE
+  OTHER
+}
+
 model Organization {
   id        String   @id @default(uuid()) @db.Uuid
   name      String
@@ -29,6 +36,7 @@ model Organization {
 
   members   OrganizationUser[] @relation("OrganizationMemberships")
   customers Customer[]
+  assets    Asset[]
 }
 
 model User {
@@ -76,9 +84,40 @@ model Customer {
   updatedAt      DateTime     @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assets       Asset[]
 
   @@index([organizationId])
   @@index([organizationId, active])
+}
+
+model Asset {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid
+  customerId     String    @db.Uuid
+  type           AssetType @default(VEHICLE)
+  name           String
+  identifier     String?
+  plate          String?
+  vin            String?
+  serialNumber   String?
+  make           String?
+  model          String?
+  year           Int?
+  color          String?
+  notes          String?
+  active         Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer     Customer     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([organizationId, customerId])
+  @@index([organizationId, active])
+  @@index([organizationId, type])
+  @@index([organizationId, plate])
+  @@index([organizationId, vin])
 }
 
 model AuthSession {

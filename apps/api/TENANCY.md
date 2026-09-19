@@ -16,3 +16,8 @@ trusted until active membership and active organization checks succeed.
 Tenant entity services must accept `organizationId` explicitly. Reads, counts,
 and mutations must include it in the Prisma `where` clause; updates by ID use a
 tenant-scoped operation such as `updateMany({ where: { id, organizationId } })`.
+
+Relations between tenant entities must also be validated with the same
+`organizationId`. A valid foreign key is not authorization: for example, a
+frontend-provided `customerId` must be checked against
+`request.organizationContext.organizationId` before it can be assigned.
