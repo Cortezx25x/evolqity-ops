@@ -8,6 +8,7 @@ import Fastify from 'fastify';
 import { env } from './config/env.js';
 import { prisma } from './lib/prisma.js';
 import { registerAuthRoutes } from './modules/auth/auth.routes.js';
+import { registerCustomerRoutes } from './modules/customers/customer.routes.js';
 import { registerOrganizationUserRoutes } from './modules/organization-users/organization-user.routes.js';
 import { registerOrganizationRoutes } from './modules/organizations/organization.routes.js';
 import { registerUserRoutes } from './modules/users/user.routes.js';
@@ -121,6 +122,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   await registerOrganizationRoutes(app);
   await registerUserRoutes(app);
   await registerOrganizationUserRoutes(app);
+  await registerCustomerRoutes(app);
 
   return app;
 }
