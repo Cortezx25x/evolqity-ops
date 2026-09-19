@@ -34,3 +34,11 @@ export const loginBodySchema = z.object({
 });
 
 export type LoginBody = z.infer<typeof loginBodySchema>;
+
+export const selectOrganizationBodySchema = z.object({
+  organizationId: z.uuid(),
+});
+
+export type SelectOrganizationBody = z.infer<
+  typeof selectOrganizationBodySchema
+>;

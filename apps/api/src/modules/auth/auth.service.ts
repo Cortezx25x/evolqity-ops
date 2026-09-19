@@ -3,6 +3,7 @@ import { randomBytes } from 'node:crypto';
 import { env } from '../../config/env.js';
 import { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../../lib/prisma.js';
+import { getOrganizationSelectionForUser } from '../organizations/organization.service.js';
 import {
   AuthEmailExistsError,
   AuthOrganizationSlugExistsError,
@@ -495,4 +496,11 @@ export async function getCurrentUser(userId: string): Promise<{
     },
     organizations: mapMemberships(user.organizations),
   };
+}
+
+export async function selectOrganizationForUser(
+  userId: string,
+  organizationId: string,
+) {
+  return getOrganizationSelectionForUser(userId, organizationId);
 }

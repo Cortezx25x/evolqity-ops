@@ -1,13 +1,6 @@
 import { prisma } from '../../lib/prisma.js';
-import { Prisma } from '../../generated/prisma/client.js';
+import type { OrganizationRequestContext } from '../organizations/organization.service.js';
 import type { CreateOrganizationMemberBody } from './organization-user.schemas.js';
-
-export class OrganizationNotFoundError extends Error {
-  constructor() {
-    super('Organization not found');
-    this.name = 'OrganizationNotFoundError';
-  }
-}
 
 export class UserNotFoundError extends Error {
   constructor() {
@@ -23,24 +16,31 @@ export class UserAlreadyMemberError extends Error {
   }
 }
 
+export class ForbiddenOrganizationActionError extends Error {
+  constructor() {
+    super('Forbidden');
+    this.name = 'ForbiddenOrganizationActionError';
+  }
+}
+
 function isMembershipUniqueViolation(error: unknown): boolean {
   return (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === 'P2002'
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: unknown }).code === 'P2002'
   );
 }
 
 export async function createOrganizationMember(
-  organizationId: string,
+  context: OrganizationRequestContext,
   input: CreateOrganizationMemberBody,
 ) {
-  const organization = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: { id: true },
-  });
-
-  if (organization === null) {
-    throw new OrganizationNotFoundError();
+  if (
+    context.role === 'MEMBER' ||
+    (context.role === 'ADMIN' && input.role === 'OWNER')
+  ) {
+    throw new ForbiddenOrganizationActionError();
   }
 
   const user = await prisma.user.findUnique({
@@ -55,7 +55,7 @@ export async function createOrganizationMember(
   const existingMembership = await prisma.organizationUser.findUnique({
     where: {
       organizationId_userId: {
-        organizationId,
+        organizationId: context.organizationId,
         userId: input.userId,
       },
     },
@@ -69,7 +69,7 @@ export async function createOrganizationMember(
   try {
     return await prisma.organizationUser.create({
       data: {
-        organizationId,
+        organizationId: context.organizationId,
         userId: input.userId,
         role: input.role,
       },
@@ -83,20 +83,14 @@ export async function createOrganizationMember(
   }
 }
 
-export async function listActiveOrganizationMembers(organizationId: string) {
-  const organization = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: { id: true },
-  });
-
-  if (organization === null) {
-    throw new OrganizationNotFoundError();
-  }
-
+export async function listActiveOrganizationMembers(
+  context: OrganizationRequestContext,
+) {
   return prisma.organizationUser.findMany({
     where: {
-      organizationId,
+      organizationId: context.organizationId,
       active: true,
+      user: { active: true },
     },
     orderBy: { createdAt: 'asc' },
     select: {

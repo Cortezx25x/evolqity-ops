@@ -12,6 +12,7 @@ import { registerOrganizationUserRoutes } from './modules/organization-users/org
 import { registerOrganizationRoutes } from './modules/organizations/organization.routes.js';
 import { registerUserRoutes } from './modules/users/user.routes.js';
 import { registerAuthenticationPlugin } from './plugins/authentication.js';
+import { registerOrganizationContextPlugin } from './plugins/organization-context.js';
 
 export interface BuildAppOptions {
   logger?: boolean;
@@ -58,6 +59,11 @@ export async function buildApp(options: BuildAppOptions = {}) {
 
   await app.register(cors, {
     credentials: true,
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Organization-Id',
+    ],
     origin(origin, callback) {
       if (origin === undefined || env.CORS_ORIGINS.includes(origin)) {
         callback(null, true);
@@ -85,6 +91,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
     global: false,
   });
   await registerAuthenticationPlugin(app);
+  await registerOrganizationContextPlugin(app);
 
   app.get('/api/health', async () => ({
     status: 'ok',
@@ -111,8 +118,6 @@ export async function buildApp(options: BuildAppOptions = {}) {
 
   await registerAuthRoutes(app);
 
-  // These CRUD routes require authentication only. Tenant isolation and
-  // organization-level authorization are intentionally deferred.
   await registerOrganizationRoutes(app);
   await registerUserRoutes(app);
   await registerOrganizationUserRoutes(app);

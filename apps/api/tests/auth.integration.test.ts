@@ -560,12 +560,21 @@ describe('authentication API', () => {
       ['GET', '/api/organizations'],
       ['POST', '/api/organizations'],
       ['GET', `/api/users/${randomUUID()}`],
-      ['POST', '/api/users'],
       ['GET', `/api/organizations/${randomUUID()}/members`],
       ['POST', `/api/organizations/${randomUUID()}/members`],
     ])('rejects anonymous %s %s', async (method, url) => {
       const response = await app.inject({ method, url });
       expect(response.statusCode).toBe(401);
+    });
+
+    it('does not expose generic user creation', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/users',
+        payload: { email: 'unsafe@example.com' },
+      });
+
+      expect(response.statusCode).toBe(404);
     });
 
     it('keeps health and readiness public', async () => {

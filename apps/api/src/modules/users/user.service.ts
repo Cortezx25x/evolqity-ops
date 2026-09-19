@@ -45,9 +45,21 @@ export async function createUser(input: CreateUserBody) {
   }
 }
 
-export async function getUserById(id: string) {
-  return prisma.user.findUnique({
-    where: { id },
+export async function getUserByIdInOrganization(
+  id: string,
+  organizationId: string,
+) {
+  return prisma.user.findFirst({
+    where: {
+      id,
+      organizations: {
+        some: {
+          organizationId,
+          active: true,
+          organization: { active: true },
+        },
+      },
+    },
     select: publicUserSelect,
   });
 }

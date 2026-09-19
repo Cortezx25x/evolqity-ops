@@ -7,8 +7,8 @@ import {
 import {
   OrganizationSlugExistsError,
   createOrganization,
-  getOrganizationById,
-  listActiveOrganizations,
+  getOrganizationByIdForUser,
+  listActiveOrganizationsForUser,
 } from './organization.service.js';
 
 export async function registerOrganizationRoutes(
@@ -18,32 +18,38 @@ export async function registerOrganizationRoutes(
     '/api/organizations',
     { preHandler: app.authenticate },
     async (request, reply) => {
-    const parsedBody = createOrganizationBodySchema.safeParse(request.body);
+      const parsedBody = createOrganizationBodySchema.safeParse(request.body);
 
-    if (!parsedBody.success) {
-      request.log.warn(
-        { issues: parsedBody.error.issues },
-        'Invalid create organization body',
-      );
+      if (!parsedBody.success) {
+        request.log.warn(
+          { issues: parsedBody.error.issues },
+          'Invalid create organization body',
+        );
 
-      return reply.code(400).send({ message: 'Invalid request body' });
-    }
-
-    try {
-      const organization = await createOrganization(parsedBody.data);
-
-      return reply.code(201).send(organization);
-    } catch (error) {
-      if (error instanceof OrganizationSlugExistsError) {
-        return reply.code(409).send({
-          message: 'Organization slug already exists',
-        });
+        return reply.code(400).send({ message: 'Invalid request body' });
       }
 
-      request.log.error(error);
+      if (request.auth === null) {
+        return reply.code(401).send({ message: 'Unauthorized' });
+      }
 
-      return reply.code(500).send({ message: 'Internal server error' });
-    }
+      try {
+        const organization = await createOrganization(
+          request.auth.userId,
+          parsedBody.data,
+        );
+
+        return reply.code(201).send(organization);
+      } catch (error) {
+        if (error instanceof OrganizationSlugExistsError) {
+          return reply.code(409).send({
+            message: 'Organization slug already exists',
+          });
+        }
+
+        request.log.error(error);
+        return reply.code(500).send({ message: 'Internal server error' });
+      }
     },
   );
 
@@ -51,15 +57,20 @@ export async function registerOrganizationRoutes(
     '/api/organizations',
     { preHandler: app.authenticate },
     async (request, reply) => {
-    try {
-      const organizations = await listActiveOrganizations();
+      if (request.auth === null) {
+        return reply.code(401).send({ message: 'Unauthorized' });
+      }
 
-      return reply.code(200).send(organizations);
-    } catch (error) {
-      request.log.error(error);
+      try {
+        const organizations = await listActiveOrganizationsForUser(
+          request.auth.userId,
+        );
 
-      return reply.code(500).send({ message: 'Internal server error' });
-    }
+        return reply.code(200).send(organizations);
+      } catch (error) {
+        request.log.error(error);
+        return reply.code(500).send({ message: 'Internal server error' });
+      }
     },
   );
 
@@ -67,25 +78,31 @@ export async function registerOrganizationRoutes(
     '/api/organizations/:id',
     { preHandler: app.authenticate },
     async (request, reply) => {
-    const parsedParams = organizationIdParamsSchema.safeParse(request.params);
+      const parsedParams = organizationIdParamsSchema.safeParse(request.params);
 
-    if (!parsedParams.success) {
-      return reply.code(400).send({ message: 'Invalid organization id' });
-    }
-
-    try {
-      const organization = await getOrganizationById(parsedParams.data.id);
-
-      if (organization === null) {
-        return reply.code(404).send({ message: 'Organization not found' });
+      if (!parsedParams.success) {
+        return reply.code(400).send({ message: 'Invalid organization id' });
       }
 
-      return reply.code(200).send(organization);
-    } catch (error) {
-      request.log.error(error);
+      if (request.auth === null) {
+        return reply.code(401).send({ message: 'Unauthorized' });
+      }
 
-      return reply.code(500).send({ message: 'Internal server error' });
-    }
+      try {
+        const organization = await getOrganizationByIdForUser(
+          request.auth.userId,
+          parsedParams.data.id,
+        );
+
+        if (organization === null) {
+          return reply.code(403).send({ message: 'Forbidden' });
+        }
+
+        return reply.code(200).send(organization);
+      } catch (error) {
+        request.log.error(error);
+        return reply.code(500).send({ message: 'Internal server error' });
+      }
     },
   );
 }

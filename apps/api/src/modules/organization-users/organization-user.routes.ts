@@ -5,7 +5,7 @@ import {
   organizationIdParamsSchema,
 } from './organization-user.schemas.js';
 import {
-  OrganizationNotFoundError,
+  ForbiddenOrganizationActionError,
   UserAlreadyMemberError,
   UserNotFoundError,
   createOrganizationMember,
@@ -17,7 +17,13 @@ export async function registerOrganizationUserRoutes(
 ): Promise<void> {
   app.post(
     '/api/organizations/:organizationId/members',
-    { preHandler: app.authenticate },
+    {
+      preHandler: [
+        app.authenticate,
+        app.requireOrganizationContext,
+        app.requireOrganizationRoles('OWNER', 'ADMIN'),
+      ],
+    },
     async (request, reply) => {
       const parsedParams = organizationIdParamsSchema.safeParse(
         request.params,
@@ -40,16 +46,24 @@ export async function registerOrganizationUserRoutes(
         return reply.code(400).send({ message: 'Invalid request body' });
       }
 
+      if (
+        request.organizationContext === null ||
+        parsedParams.data.organizationId !==
+          request.organizationContext.organizationId
+      ) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+
       try {
         const membership = await createOrganizationMember(
-          parsedParams.data.organizationId,
+          request.organizationContext,
           parsedBody.data,
         );
 
         return reply.code(201).send(membership);
       } catch (error) {
-        if (error instanceof OrganizationNotFoundError) {
-          return reply.code(404).send({ message: 'Organization not found' });
+        if (error instanceof ForbiddenOrganizationActionError) {
+          return reply.code(403).send({ message: 'Forbidden' });
         }
 
         if (error instanceof UserNotFoundError) {
@@ -71,7 +85,9 @@ export async function registerOrganizationUserRoutes(
 
   app.get(
     '/api/organizations/:organizationId/members',
-    { preHandler: app.authenticate },
+    {
+      preHandler: [app.authenticate, app.requireOrganizationContext],
+    },
     async (request, reply) => {
       const parsedParams = organizationIdParamsSchema.safeParse(
         request.params,
@@ -81,17 +97,21 @@ export async function registerOrganizationUserRoutes(
         return reply.code(400).send({ message: 'Invalid organization id' });
       }
 
+      if (
+        request.organizationContext === null ||
+        parsedParams.data.organizationId !==
+          request.organizationContext.organizationId
+      ) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+
       try {
         const members = await listActiveOrganizationMembers(
-          parsedParams.data.organizationId,
+          request.organizationContext,
         );
 
         return reply.code(200).send(members);
       } catch (error) {
-        if (error instanceof OrganizationNotFoundError) {
-          return reply.code(404).send({ message: 'Organization not found' });
-        }
-
         request.log.error(error);
 
         return reply.code(500).send({ message: 'Internal server error' });

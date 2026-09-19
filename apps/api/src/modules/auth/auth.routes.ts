@@ -11,13 +11,18 @@ import {
   InvalidCredentialsError,
   InvalidRefreshTokenError,
 } from './auth.errors.js';
-import { loginBodySchema, registerBodySchema } from './auth.schemas.js';
+import {
+  loginBodySchema,
+  registerBodySchema,
+  selectOrganizationBodySchema,
+} from './auth.schemas.js';
 import {
   getCurrentUser,
   login,
   logout,
   refreshSession,
   register,
+  selectOrganizationForUser,
 } from './auth.service.js';
 import { signAccessToken } from './auth.tokens.js';
 import type { AuthSessionResult } from './auth.types.js';
@@ -198,6 +203,66 @@ export async function registerAuthRoutes(app: FastifyInstance): Promise<void> {
         }
 
         return reply.code(200).send(currentUser);
+      } catch (error) {
+        request.log.error(error);
+        return reply.code(500).send({ message: 'Internal server error' });
+      }
+    },
+  );
+
+  app.post(
+    '/api/auth/select-organization',
+    { preHandler: app.authenticate },
+    async (request, reply) => {
+      const parsedBody = selectOrganizationBodySchema.safeParse(request.body);
+
+      if (!parsedBody.success) {
+        return reply.code(400).send({ message: 'Invalid request body' });
+      }
+
+      if (request.auth === null) {
+        return reply.code(401).send({ message: 'Unauthorized' });
+      }
+
+      try {
+        const selection = await selectOrganizationForUser(
+          request.auth.userId,
+          parsedBody.data.organizationId,
+        );
+
+        if (selection === null) {
+          return reply.code(403).send({ message: 'Forbidden' });
+        }
+
+        return reply.code(200).send(selection);
+      } catch (error) {
+        request.log.error(error);
+        return reply.code(500).send({ message: 'Internal server error' });
+      }
+    },
+  );
+
+  app.get(
+    '/api/auth/context',
+    {
+      preHandler: [app.authenticate, app.requireOrganizationContext],
+    },
+    async (request, reply) => {
+      if (request.auth === null || request.organizationContext === null) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+
+      try {
+        const selection = await selectOrganizationForUser(
+          request.auth.userId,
+          request.organizationContext.organizationId,
+        );
+
+        if (selection === null) {
+          return reply.code(403).send({ message: 'Forbidden' });
+        }
+
+        return reply.code(200).send(selection);
       } catch (error) {
         request.log.error(error);
         return reply.code(500).send({ message: 'Internal server error' });
