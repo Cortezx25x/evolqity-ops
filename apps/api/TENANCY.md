@@ -38,3 +38,9 @@ InspectionItem. Its `storageKey` is internal, and physical content is served
 only after resolving tenant-scoped metadata. Database cascades are not a
 substitute for filesystem cleanup, so media-bearing parents use restrictive
 foreign keys and child IDs are always authorized through their parent.
+
+Estimates belong to tenant-scoped WorkOrders, and EstimateItems derive their
+tenant exclusively from the authorized Estimate. Related UUIDs never grant
+authorization by themselves. Estimate numbers, item ordering, and totals are
+server-controlled; monetary calculations use exact decimal arithmetic rather
+than JavaScript floating point.

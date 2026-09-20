@@ -11,6 +11,7 @@ import { prisma } from './lib/prisma.js';
 import { registerAssetRoutes } from './modules/assets/asset.routes.js';
 import { registerAuthRoutes } from './modules/auth/auth.routes.js';
 import { registerCustomerRoutes } from './modules/customers/customer.routes.js';
+import { registerEstimateRoutes } from './modules/estimates/estimate.routes.js';
 import { registerInspectionRoutes } from './modules/inspections/inspection.routes.js';
 import { registerMediaRoutes } from './modules/media/media.routes.js';
 import { registerOrganizationUserRoutes } from './modules/organization-users/organization-user.routes.js';
@@ -141,6 +142,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   await registerWorkOrderRoutes(app);
   await registerInspectionRoutes(app);
   await registerMediaRoutes(app);
+  await registerEstimateRoutes(app);
 
   return app;
 }
