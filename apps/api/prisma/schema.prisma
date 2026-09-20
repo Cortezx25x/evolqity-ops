@@ -41,6 +41,18 @@ enum WorkOrderPriority {
   URGENT
 }
 
+enum InspectionStatus {
+  DRAFT
+  COMPLETED
+}
+
+enum InspectionItemCondition {
+  OK
+  ATTENTION
+  FAIL
+  NOT_APPLICABLE
+}
+
 model Organization {
   id                  String   @id @default(uuid()) @db.Uuid
   name                String
@@ -51,10 +63,11 @@ model Organization {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
-  members    OrganizationUser[] @relation("OrganizationMemberships")
-  customers  Customer[]
-  assets     Asset[]
-  workOrders WorkOrder[]
+  members     OrganizationUser[] @relation("OrganizationMemberships")
+  customers   Customer[]
+  assets      Asset[]
+  workOrders  WorkOrder[]
+  inspections Inspection[]
 }
 
 model User {
@@ -83,8 +96,10 @@ model OrganizationUser {
   organization Organization @relation("OrganizationMemberships", fields: [organizationId], references: [id])
   user         User         @relation("UserMemberships", fields: [userId], references: [id])
 
-  assignedWorkOrders WorkOrder[] @relation("WorkOrderAssignee")
-  createdWorkOrders  WorkOrder[] @relation("WorkOrderCreator")
+  assignedWorkOrders   WorkOrder[]  @relation("WorkOrderAssignee")
+  createdWorkOrders    WorkOrder[]  @relation("WorkOrderCreator")
+  createdInspections   Inspection[] @relation("InspectionCreator")
+  completedInspections Inspection[] @relation("InspectionCompleter")
 
   @@unique([organizationId, userId])
   @@index([organizationId])
@@ -170,6 +185,7 @@ model WorkOrder {
   asset        Asset?            @relation(fields: [assetId], references: [id], onDelete: Restrict)
   assignedTo   OrganizationUser? @relation("WorkOrderAssignee", fields: [assignedToMembershipId], references: [id], onDelete: SetNull)
   createdBy    OrganizationUser  @relation("WorkOrderCreator", fields: [createdByMembershipId], references: [id], onDelete: Restrict)
+  inspections  Inspection[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -177,6 +193,47 @@ model WorkOrder {
   @@index([organizationId, assetId])
   @@index([organizationId, assignedToMembershipId])
   @@index([organizationId, createdAt])
+}
+
+model Inspection {
+  id                      String           @id @default(uuid()) @db.Uuid
+  organizationId          String           @db.Uuid
+  workOrderId             String           @db.Uuid
+  title                   String
+  notes                   String?
+  status                  InspectionStatus @default(DRAFT)
+  nextItemOrder           Int              @default(1)
+  createdByMembershipId   String           @db.Uuid
+  completedByMembershipId String?          @db.Uuid
+  completedAt             DateTime?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workOrder    WorkOrder         @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  createdBy    OrganizationUser  @relation("InspectionCreator", fields: [createdByMembershipId], references: [id], onDelete: Restrict)
+  completedBy  OrganizationUser? @relation("InspectionCompleter", fields: [completedByMembershipId], references: [id], onDelete: SetNull)
+  items        InspectionItem[]
+
+  @@index([organizationId, workOrderId])
+  @@index([organizationId, status])
+  @@index([organizationId, createdAt])
+}
+
+model InspectionItem {
+  id           String                   @id @default(uuid()) @db.Uuid
+  inspectionId String                   @db.Uuid
+  label        String
+  description  String?
+  condition    InspectionItemCondition?
+  notes        String?
+  sortOrder    Int
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt
+
+  inspection Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
+  @@index([inspectionId, sortOrder])
 }
 
 model AuthSession {

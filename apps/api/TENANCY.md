@@ -26,3 +26,9 @@ For work orders, an optional Asset must also belong to the selected Customer,
 and an assignee membership must be active in the same organization. Related
 IDs never grant access. Tenant-scoped sequence numbers are generated only by
 the server inside the transaction that creates the record.
+
+Child resources inherit authorization through their tenant-owned parent.
+Creating an Inspection requires a WorkOrder from the active organization, and
+an InspectionItem derives its tenant from its Inspection. A child UUID alone
+never grants access; both parent ownership and the parent-child relationship
+must be verified.
