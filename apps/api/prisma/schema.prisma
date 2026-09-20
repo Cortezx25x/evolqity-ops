@@ -25,18 +25,36 @@ enum AssetType {
   OTHER
 }
 
-model Organization {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  slug      String   @unique
-  type      String?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum WorkOrderStatus {
+  DRAFT
+  OPEN
+  IN_PROGRESS
+  WAITING
+  COMPLETED
+  CANCELLED
+}
 
-  members   OrganizationUser[] @relation("OrganizationMemberships")
-  customers Customer[]
-  assets    Asset[]
+enum WorkOrderPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model Organization {
+  id                  String   @id @default(uuid()) @db.Uuid
+  name                String
+  slug                String   @unique
+  type                String?
+  active              Boolean  @default(true)
+  nextWorkOrderNumber Int      @default(1)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  members    OrganizationUser[] @relation("OrganizationMemberships")
+  customers  Customer[]
+  assets     Asset[]
+  workOrders WorkOrder[]
 }
 
 model User {
@@ -65,6 +83,9 @@ model OrganizationUser {
   organization Organization @relation("OrganizationMemberships", fields: [organizationId], references: [id])
   user         User         @relation("UserMemberships", fields: [userId], references: [id])
 
+  assignedWorkOrders WorkOrder[] @relation("WorkOrderAssignee")
+  createdWorkOrders  WorkOrder[] @relation("WorkOrderCreator")
+
   @@unique([organizationId, userId])
   @@index([organizationId])
   @@index([userId])
@@ -85,6 +106,7 @@ model Customer {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   assets       Asset[]
+  workOrders   WorkOrder[]
 
   @@index([organizationId])
   @@index([organizationId, active])
@@ -111,6 +133,7 @@ model Asset {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   customer     Customer     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  workOrders   WorkOrder[]
 
   @@index([organizationId])
   @@index([organizationId, customerId])
@@ -118,6 +141,42 @@ model Asset {
   @@index([organizationId, type])
   @@index([organizationId, plate])
   @@index([organizationId, vin])
+}
+
+model WorkOrder {
+  id                     String            @id @default(uuid()) @db.Uuid
+  organizationId         String            @db.Uuid
+  number                 Int
+  customerId             String            @db.Uuid
+  assetId                String?           @db.Uuid
+  status                 WorkOrderStatus   @default(OPEN)
+  priority               WorkOrderPriority @default(NORMAL)
+  title                  String
+  description            String?
+  diagnosis              String?
+  resolution             String?
+  internalNotes          String?
+  assignedToMembershipId String?           @db.Uuid
+  createdByMembershipId  String            @db.Uuid
+  scheduledAt            DateTime?
+  startedAt              DateTime?
+  completedAt            DateTime?
+  cancelledAt            DateTime?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer     Customer          @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  asset        Asset?            @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  assignedTo   OrganizationUser? @relation("WorkOrderAssignee", fields: [assignedToMembershipId], references: [id], onDelete: SetNull)
+  createdBy    OrganizationUser  @relation("WorkOrderCreator", fields: [createdByMembershipId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, number])
+  @@index([organizationId, status])
+  @@index([organizationId, customerId])
+  @@index([organizationId, assetId])
+  @@index([organizationId, assignedToMembershipId])
+  @@index([organizationId, createdAt])
 }
 
 model AuthSession {

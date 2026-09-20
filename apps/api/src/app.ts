@@ -13,6 +13,7 @@ import { registerCustomerRoutes } from './modules/customers/customer.routes.js';
 import { registerOrganizationUserRoutes } from './modules/organization-users/organization-user.routes.js';
 import { registerOrganizationRoutes } from './modules/organizations/organization.routes.js';
 import { registerUserRoutes } from './modules/users/user.routes.js';
+import { registerWorkOrderRoutes } from './modules/work-orders/work-order.routes.js';
 import { registerAuthenticationPlugin } from './plugins/authentication.js';
 import { registerOrganizationContextPlugin } from './plugins/organization-context.js';
 
@@ -125,6 +126,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   await registerOrganizationUserRoutes(app);
   await registerCustomerRoutes(app);
   await registerAssetRoutes(app);
+  await registerWorkOrderRoutes(app);
 
   return app;
 }

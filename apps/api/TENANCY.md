@@ -21,3 +21,8 @@ Relations between tenant entities must also be validated with the same
 `organizationId`. A valid foreign key is not authorization: for example, a
 frontend-provided `customerId` must be checked against
 `request.organizationContext.organizationId` before it can be assigned.
+
+For work orders, an optional Asset must also belong to the selected Customer,
+and an assignee membership must be active in the same organization. Related
+IDs never grant access. Tenant-scoped sequence numbers are generated only by
+the server inside the transaction that creates the record.

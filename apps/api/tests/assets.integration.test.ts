@@ -130,6 +130,7 @@ describe('assets API', () => {
   beforeEach(async () => {
     await prisma.refreshToken.deleteMany();
     await prisma.authSession.deleteMany();
+    await prisma.workOrder.deleteMany();
     await prisma.asset.deleteMany();
     await prisma.customer.deleteMany();
     await prisma.organizationUser.deleteMany();
