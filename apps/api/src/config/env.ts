@@ -85,6 +85,9 @@ const envSchema = z
     TRUST_PROXY: booleanFromEnvironment(false),
     AUTH_LOGIN_RATE_LIMIT_MAX: positiveInteger(5),
     AUTH_LOGIN_RATE_LIMIT_WINDOW_SECONDS: positiveInteger(60),
+    MEDIA_STORAGE_DRIVER: z.literal('local').default('local'),
+    MEDIA_LOCAL_ROOT: z.string().trim().min(1),
+    MEDIA_MAX_FILE_SIZE_BYTES: positiveInteger(10_485_760),
   })
   .superRefine((value, context) => {
     if (value.AUTH_COOKIE_SAME_SITE === 'none' && !value.AUTH_COOKIE_SECURE) {

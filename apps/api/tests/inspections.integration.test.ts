@@ -242,6 +242,7 @@ describe('inspections API', () => {
   beforeEach(async () => {
     await prisma.refreshToken.deleteMany();
     await prisma.authSession.deleteMany();
+    await prisma.media.deleteMany();
     await prisma.inspectionItem.deleteMany();
     await prisma.inspection.deleteMany();
     await prisma.workOrder.deleteMany();

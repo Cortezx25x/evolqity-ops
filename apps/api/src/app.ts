@@ -2,6 +2,7 @@ import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import jwt from '@fastify/jwt';
+import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import Fastify from 'fastify';
 
@@ -11,6 +12,7 @@ import { registerAssetRoutes } from './modules/assets/asset.routes.js';
 import { registerAuthRoutes } from './modules/auth/auth.routes.js';
 import { registerCustomerRoutes } from './modules/customers/customer.routes.js';
 import { registerInspectionRoutes } from './modules/inspections/inspection.routes.js';
+import { registerMediaRoutes } from './modules/media/media.routes.js';
 import { registerOrganizationUserRoutes } from './modules/organization-users/organization-user.routes.js';
 import { registerOrganizationRoutes } from './modules/organizations/organization.routes.js';
 import { registerUserRoutes } from './modules/users/user.routes.js';
@@ -79,6 +81,15 @@ export async function buildApp(options: BuildAppOptions = {}) {
   });
   await app.register(helmet);
   await app.register(cookie);
+  await app.register(multipart, {
+    limits: {
+      fileSize: env.MEDIA_MAX_FILE_SIZE_BYTES,
+      files: 1,
+      fields: 1,
+      parts: 2,
+    },
+    throwFileSizeLimit: true,
+  });
   await app.register(jwt, {
     secret: env.AUTH_ACCESS_TOKEN_SECRET,
     sign: {
@@ -129,6 +140,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   await registerAssetRoutes(app);
   await registerWorkOrderRoutes(app);
   await registerInspectionRoutes(app);
+  await registerMediaRoutes(app);
 
   return app;
 }

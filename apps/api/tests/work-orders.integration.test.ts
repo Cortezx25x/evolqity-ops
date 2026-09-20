@@ -212,6 +212,7 @@ describe('work orders API', () => {
   beforeEach(async () => {
     await prisma.refreshToken.deleteMany();
     await prisma.authSession.deleteMany();
+    await prisma.media.deleteMany();
     await prisma.workOrder.deleteMany();
     await prisma.asset.deleteMany();
     await prisma.customer.deleteMany();

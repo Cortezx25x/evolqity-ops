@@ -68,6 +68,7 @@ model Organization {
   assets      Asset[]
   workOrders  WorkOrder[]
   inspections Inspection[]
+  media       Media[]
 }
 
 model User {
@@ -100,6 +101,7 @@ model OrganizationUser {
   createdWorkOrders    WorkOrder[]  @relation("WorkOrderCreator")
   createdInspections   Inspection[] @relation("InspectionCreator")
   completedInspections Inspection[] @relation("InspectionCompleter")
+  uploadedMedia        Media[]      @relation("MediaUploader")
 
   @@unique([organizationId, userId])
   @@index([organizationId])
@@ -186,6 +188,7 @@ model WorkOrder {
   assignedTo   OrganizationUser? @relation("WorkOrderAssignee", fields: [assignedToMembershipId], references: [id], onDelete: SetNull)
   createdBy    OrganizationUser  @relation("WorkOrderCreator", fields: [createdByMembershipId], references: [id], onDelete: Restrict)
   inspections  Inspection[]
+  media        Media[]
 
   @@unique([organizationId, number])
   @@index([organizationId, status])
@@ -214,6 +217,7 @@ model Inspection {
   createdBy    OrganizationUser  @relation("InspectionCreator", fields: [createdByMembershipId], references: [id], onDelete: Restrict)
   completedBy  OrganizationUser? @relation("InspectionCompleter", fields: [completedByMembershipId], references: [id], onDelete: SetNull)
   items        InspectionItem[]
+  media        Media[]
 
   @@index([organizationId, workOrderId])
   @@index([organizationId, status])
@@ -232,8 +236,36 @@ model InspectionItem {
   updatedAt    DateTime                 @updatedAt
 
   inspection Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  media      Media[]
 
   @@index([inspectionId, sortOrder])
+}
+
+model Media {
+  id                     String   @id @default(uuid()) @db.Uuid
+  organizationId         String   @db.Uuid
+  workOrderId            String?  @db.Uuid
+  inspectionId           String?  @db.Uuid
+  inspectionItemId       String?  @db.Uuid
+  storageKey             String   @unique
+  originalName           String
+  mimeType               String
+  sizeBytes              Int
+  sha256                 String
+  caption                String?
+  uploadedByMembershipId String   @db.Uuid
+  createdAt              DateTime @default(now())
+
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  workOrder      WorkOrder?       @relation(fields: [workOrderId], references: [id], onDelete: Restrict)
+  inspection     Inspection?      @relation(fields: [inspectionId], references: [id], onDelete: Restrict)
+  inspectionItem InspectionItem?  @relation(fields: [inspectionItemId], references: [id], onDelete: Restrict)
+  uploadedBy     OrganizationUser @relation("MediaUploader", fields: [uploadedByMembershipId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, workOrderId])
+  @@index([organizationId, inspectionId])
+  @@index([organizationId, inspectionItemId])
+  @@index([organizationId, createdAt])
 }
 
 model AuthSession {

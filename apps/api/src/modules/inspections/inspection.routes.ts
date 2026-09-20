@@ -14,6 +14,7 @@ import {
   InspectionCompletedError,
   InspectionHasIncompleteItemsError,
   InspectionHasNoItemsError,
+  InspectionItemHasMediaError,
   InspectionItemNotFoundError,
   InspectionNotFoundError,
   InspectionWorkOrderClosedError,
@@ -44,6 +45,9 @@ function knownInspectionError(error: unknown) {
   }
   if (error instanceof InspectionItemNotFoundError) {
     return { statusCode: 404, message: 'Inspection item not found' };
+  }
+  if (error instanceof InspectionItemHasMediaError) {
+    return { statusCode: 409, message: 'Inspection item has media' };
   }
   if (error instanceof InspectionHasNoItemsError) {
     return { statusCode: 409, message: 'Inspection has no items' };

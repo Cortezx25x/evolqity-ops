@@ -43,6 +43,13 @@ export class InspectionItemNotFoundError extends Error {
   }
 }
 
+export class InspectionItemHasMediaError extends Error {
+  constructor() {
+    super('Inspection item has media');
+    this.name = 'InspectionItemHasMediaError';
+  }
+}
+
 export class InspectionHasNoItemsError extends Error {
   constructor() {
     super('Inspection has no items');
@@ -524,6 +531,18 @@ export async function deleteInspectionItem(
   return prisma.$transaction(async (transaction) => {
     await requireMutableInspection(transaction, organizationId, inspectionId);
     await lockDraftInspection(transaction, organizationId, inspectionId);
+
+    const mediaCount = await transaction.media.count({
+      where: {
+        organizationId,
+        inspectionItemId: itemId,
+        inspectionItem: { is: { inspectionId } },
+      },
+    });
+
+    if (mediaCount > 0) {
+      throw new InspectionItemHasMediaError();
+    }
 
     const result = await transaction.inspectionItem.deleteMany({
       where: {

@@ -1,4 +1,6 @@
 import { randomBytes } from 'node:crypto';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import 'dotenv/config';
 
 process.env.NODE_ENV = 'test';
@@ -21,3 +23,10 @@ process.env.CORS_ORIGINS = 'http://localhost:5173';
 process.env.TRUST_PROXY = 'false';
 process.env.AUTH_LOGIN_RATE_LIMIT_MAX = '1000';
 process.env.AUTH_LOGIN_RATE_LIMIT_WINDOW_SECONDS = '60';
+process.env.MEDIA_STORAGE_DRIVER = 'local';
+process.env.MEDIA_LOCAL_ROOT = path.join(
+  tmpdir(),
+  'evolqity-ops-media-test',
+  String(process.pid),
+);
+process.env.MEDIA_MAX_FILE_SIZE_BYTES = '10485760';

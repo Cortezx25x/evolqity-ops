@@ -32,3 +32,9 @@ Creating an Inspection requires a WorkOrder from the active organization, and
 an InspectionItem derives its tenant from its Inspection. A child UUID alone
 never grants access; both parent ownership and the parent-child relationship
 must be verified.
+
+Media belongs to one tenant and exactly one parent: WorkOrder, Inspection, or
+InspectionItem. Its `storageKey` is internal, and physical content is served
+only after resolving tenant-scoped metadata. Database cascades are not a
+substitute for filesystem cleanup, so media-bearing parents use restrictive
+foreign keys and child IDs are always authorized through their parent.
