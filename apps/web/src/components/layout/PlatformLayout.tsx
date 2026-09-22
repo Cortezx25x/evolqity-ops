@@ -18,11 +18,13 @@ export function PlatformLayout() {
     <div className="app-shell platform-shell">
       <aside className="app-sidebar platform-sidebar" aria-label="Administración de plataforma">
         <div className="app-brand">
-          <span className="app-brand-mark" aria-hidden="true">
-            E
-          </span>
+          <img
+            src="/evolqity_ico.png"
+            alt="Evolqity"
+            className="auth-brand-logo"
+          />
           <div>
-            <p className="app-brand-name">Evolqity Ops</p>
+            <p className="app-brand-name">Evolqity Portal</p>
             <p className="app-brand-tag">Administración de plataforma</p>
           </div>
         </div>

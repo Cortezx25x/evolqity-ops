@@ -53,12 +53,14 @@ export function AppLayout() {
 
       <aside className="app-sidebar" aria-label="Navegación principal">
         <div className="app-brand">
-          <span className="app-brand-mark" aria-hidden="true">
-            E
-          </span>
+          <img
+            src="/evolqity_ico.png"
+            alt="Evolqity"
+            className="auth-brand-logo"
+          />
           <div>
-            <p className="app-brand-name">Evolqity Ops</p>
-            <p className="app-brand-tag">Operaciones de taller</p>
+            <p className="app-brand-name">Evolqity Portal</p>
+            <p className="app-brand-tag">Operaciones</p>
           </div>
         </div>
 
@@ -151,7 +153,7 @@ export function AppLayout() {
         </main>
 
         <footer className="app-footer">
-          © {new Date().getFullYear()} Evolqity Ops · Operaciones de taller
+          © {new Date().getFullYear()} Evolqity Portal · Operaciones
         </footer>
       </div>
 

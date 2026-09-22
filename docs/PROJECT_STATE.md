@@ -1,8 +1,8 @@
-# Evolqity Ops — Project State
+# Evolqity Portal — Project State
 
 **Checkpoint date:** 2026-09-21
 
-**Application status:** The core Evolqity Ops MVP is implemented across the Fastify API and responsive React SPA. The complete tenant workflow includes Customers, Assets, Work Orders, Inspections, Media, Estimates, secure public estimate approval, employee/team management, role-aware navigation, and platform-level organization administration. Authentication and multitenancy are enforced in the application layer.
+**Application status:** The core Evolqity Portal MVP is implemented across the Fastify API and responsive React SPA. The complete tenant workflow includes Customers, Assets, Work Orders, Inspections, Media, Estimates, secure public estimate approval, employee/team management, role-aware navigation, and platform-level organization administration. Authentication and multitenancy are enforced in the application layer.
 
 **Last implemented phase:** **Platform Administration**, including the separate `PLATFORM_ADMIN` capability, organization listing/search/filtering, organization rename, activate/deactivate lifecycle, operator-only platform-admin assignment/revocation, password reset tooling, platform route guards, and responsive administration UI.
 

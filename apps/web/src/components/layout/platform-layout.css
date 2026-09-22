@@ -16,6 +16,14 @@
   margin-bottom: 1rem;
 }
 
+.auth-brand-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+
 .platform-result-count {
   margin: 0;
   font-size: 0.92rem;
@@ -135,10 +143,8 @@
 @media (min-width: 960px) {
   .platform-org-table-head {
     display: grid;
-    grid-template-columns: minmax(10rem, 1.6fr) minmax(8rem, 1.35fr) 5.5rem 6.5rem 5.5rem minmax(
-        11rem,
-        1.35fr
-      );
+    grid-template-columns: minmax(10rem, 1.6fr) minmax(8rem, 1.35fr) 5.5rem 6.5rem 5.5rem minmax(11rem,
+        1.35fr);
     gap: 0.75rem;
     padding: 0 1rem 0.35rem;
     font-size: 0.78rem;
@@ -149,10 +155,8 @@
   }
 
   .platform-org-row {
-    grid-template-columns: minmax(10rem, 1.6fr) minmax(8rem, 1.35fr) 5.5rem 6.5rem 5.5rem minmax(
-        11rem,
-        1.35fr
-      );
+    grid-template-columns: minmax(10rem, 1.6fr) minmax(8rem, 1.35fr) 5.5rem 6.5rem 5.5rem minmax(11rem,
+        1.35fr);
     align-items: start;
     gap: 0.75rem;
   }

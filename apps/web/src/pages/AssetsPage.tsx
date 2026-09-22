@@ -42,7 +42,7 @@ export function AssetsPage() {
     canManageOrganization(selectedOrganization.role);
 
   useEffect(() => {
-    document.title = 'Activos · Evolqity Ops';
+    document.title = 'Activos · Evolqity Portal';
   }, []);
 
   const loadAssets = useCallback(async () => {

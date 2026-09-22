@@ -71,7 +71,7 @@ export function TeamPage() {
   }, [isTenantReady, selectedOrganization]);
 
   useEffect(() => {
-    document.title = 'Equipo · Evolqity Ops';
+    document.title = 'Equipo · Evolqity Portal';
   }, []);
 
   useEffect(() => {

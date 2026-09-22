@@ -55,7 +55,7 @@ export function WorkOrdersPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = 'Órdenes de trabajo · Evolqity Ops';
+    document.title = 'Órdenes de trabajo · Evolqity Portal';
   }, []);
 
   useEffect(() => {

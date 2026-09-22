@@ -34,7 +34,7 @@ export function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = 'Dashboard · Evolqity Ops';
+    document.title = 'Dashboard · Evolqity Portal';
   }, []);
 
   useEffect(() => {

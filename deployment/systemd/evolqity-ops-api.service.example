@@ -1,5 +1,5 @@
 [Unit]
-Description=Evolqity Ops API
+Description=Evolqity Portal API
 After=network-online.target postgresql.service
 Wants=network-online.target
 

@@ -176,7 +176,7 @@ export default function PublicEstimatePage() {
           <div className="pe-skeleton pe-skeleton--line" />
           <div className="pe-skeleton pe-skeleton--line" />
           <div className="pe-skeleton pe-skeleton--block" />
-          <footer className="pe-footer">Gestionado con Evolqity Ops</footer>
+          <footer className="pe-footer">Gestionado con Evolqity Portal</footer>
         </div>
       </main>
     );
@@ -188,7 +188,7 @@ export default function PublicEstimatePage() {
         <div className="pe-shell pe-panel pe-panel--error" role="alert">
           <h1>Cotización</h1>
           <p>{errorMessage ?? customerMessages.loadError}</p>
-          <footer className="pe-footer">Gestionado con Evolqity Ops</footer>
+          <footer className="pe-footer">Gestionado con Evolqity Portal</footer>
         </div>
       </main>
     );
@@ -253,7 +253,7 @@ export default function PublicEstimatePage() {
                   </div>
                 ) : null}
                 {view.workOrder.asset.make !== null ||
-                view.workOrder.asset.model !== null ? (
+                  view.workOrder.asset.model !== null ? (
                   <div>
                     <dt>Marca / modelo</dt>
                     <dd>
@@ -375,7 +375,7 @@ export default function PublicEstimatePage() {
           </section>
         ) : null}
 
-        <footer className="pe-footer">Gestionado con Evolqity Ops</footer>
+        <footer className="pe-footer">Gestionado con Evolqity Portal</footer>
       </div>
 
       <DecisionDialog

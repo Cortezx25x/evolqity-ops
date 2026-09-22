@@ -1,4 +1,4 @@
-# Evolqity Ops deployment and pilot-readiness runbook
+# Evolqity Portal deployment and pilot-readiness runbook
 
 This document prepares staging and a controlled 1–3 workshop pilot. It does
 not authorize deployment, DNS, firewall, database, or live service changes.

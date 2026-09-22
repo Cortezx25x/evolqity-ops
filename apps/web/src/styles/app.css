@@ -166,6 +166,13 @@
     #eef2f6;
 }
 
+.auth-brand-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .auth-card {
   width: min(100%, 28rem);
   background: #fff;
@@ -222,7 +229,7 @@
 }
 
 .app-field label,
-.app-field > span {
+.app-field>span {
   font-size: 0.92rem;
   font-weight: 600;
   color: #243b53;
@@ -515,10 +522,7 @@
 
 .app-modal {
   border: none;
-  padding: max(0.75rem, env(safe-area-inset-top))
-    max(0.75rem, env(safe-area-inset-right))
-    max(0.75rem, env(safe-area-inset-bottom))
-    max(0.75rem, env(safe-area-inset-left));
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
   margin: auto;
   background: transparent;
   max-width: none;

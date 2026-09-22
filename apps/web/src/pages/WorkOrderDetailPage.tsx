@@ -115,7 +115,7 @@ export function WorkOrderDetailPage() {
         return;
       }
       setWorkOrder(order);
-      document.title = `Orden #${order.number} · Evolqity Ops`;
+      document.title = `Orden #${order.number} · Evolqity Portal`;
 
       const [customerResult, assetResult] = await Promise.all([
         getCustomerRequest(order.customer.id).catch(() => null),

@@ -30,7 +30,7 @@ function NotFoundPage() {
       <div className="auth-card">
         <h1>Página no encontrada</h1>
         <p className="auth-subtitle">
-          La ruta solicitada no existe en Evolqity Ops.
+          La ruta solicitada no existe en Evolqity Portal.
         </p>
         <a className="app-button app-button--primary app-button--block" href="/">
           Ir al inicio

@@ -7,9 +7,11 @@ export function OrganizationPickerPage({ error }: { error: string | null }) {
     <div className="auth-page">
       <div className="auth-card auth-card--wide">
         <div className="auth-brand">
-          <span className="app-brand-mark" aria-hidden="true">
-            E
-          </span>
+          <img
+            src="/evolqity_ico.png"
+            alt="Evolqity"
+            className="auth-brand-logo"
+          />
           <div>
             <h1>Selecciona una organización</h1>
             <p className="auth-subtitle">

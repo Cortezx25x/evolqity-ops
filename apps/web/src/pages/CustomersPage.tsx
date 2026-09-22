@@ -30,7 +30,7 @@ export function CustomersPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = 'Clientes · Evolqity Ops';
+    document.title = 'Clientes · Evolqity Portal';
   }, []);
 
   const loadCustomers = useCallback(async () => {
