@@ -33,13 +33,16 @@ export function LoginPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-brand">
-          <span className="app-brand-mark" aria-hidden="true">
-            E
-          </span>
+          <img
+            src="/evolqity_ico.png"
+            alt="Evolqity"
+            className="auth-brand-logo"
+          />
+
           <div>
-            <h1>Evolqity Ops</h1>
+            <h1>Portal</h1>
             <p className="auth-subtitle">
-              Gestión de talleres y operaciones de servicio
+              Una plataforma diseñada para simplificar y optimizar tu operación.
             </p>
           </div>
         </div>
@@ -87,11 +90,6 @@ export function LoginPage() {
             {pending ? 'Iniciando sesión…' : 'Iniciar sesión'}
           </button>
         </form>
-
-        <p className="auth-footnote">
-          ¿Buscas aprobar una cotización?{' '}
-          <Link to="/estimate">Abrir enlace público</Link>
-        </p>
       </div>
     </div>
   );
