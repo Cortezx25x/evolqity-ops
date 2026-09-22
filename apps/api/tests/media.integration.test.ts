@@ -265,6 +265,7 @@ describe('media API', () => {
   beforeEach(async () => {
     await prisma.refreshToken.deleteMany();
     await prisma.authSession.deleteMany();
+    await prisma.estimatePublicToken.deleteMany();
     await prisma.media.deleteMany();
     await prisma.workOrder.deleteMany();
     await prisma.asset.deleteMany();

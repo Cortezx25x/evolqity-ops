@@ -1,5 +1,7 @@
 import 'dotenv/config';
 
+import path from 'node:path';
+
 import { z } from 'zod';
 
 const emptyStringToUndefined = (value: unknown) =>
@@ -30,6 +32,15 @@ const booleanFromEnvironment = (defaultValue: boolean) =>
     },
     z.boolean(),
   );
+
+const productionSecretNames = [
+  'AUTH_ACCESS_TOKEN_SECRET',
+  'AUTH_REFRESH_TOKEN_PEPPER',
+  'PUBLIC_ESTIMATE_TOKEN_PEPPER',
+] as const;
+
+const obviouslyWeakSecretPattern =
+  /(change[\s_-]*me|example|password|replace[\s_-]*me|secret)/i;
 
 const corsOrigins = z
   .string()
@@ -85,6 +96,13 @@ const envSchema = z
     TRUST_PROXY: booleanFromEnvironment(false),
     AUTH_LOGIN_RATE_LIMIT_MAX: positiveInteger(5),
     AUTH_LOGIN_RATE_LIMIT_WINDOW_SECONDS: positiveInteger(60),
+    PUBLIC_ESTIMATE_BASE_URL: z.string().trim().url(),
+    PUBLIC_ESTIMATE_TOKEN_PEPPER: z.string().min(32),
+    PUBLIC_ESTIMATE_TOKEN_TTL_DAYS: positiveInteger(30),
+    PUBLIC_ESTIMATE_VIEW_RATE_LIMIT_MAX: positiveInteger(60),
+    PUBLIC_ESTIMATE_VIEW_RATE_LIMIT_WINDOW_SECONDS: positiveInteger(60),
+    PUBLIC_ESTIMATE_DECISION_RATE_LIMIT_MAX: positiveInteger(10),
+    PUBLIC_ESTIMATE_DECISION_RATE_LIMIT_WINDOW_SECONDS: positiveInteger(60),
     MEDIA_STORAGE_DRIVER: z.literal('local').default('local'),
     MEDIA_LOCAL_ROOT: z.string().trim().min(1),
     MEDIA_MAX_FILE_SIZE_BYTES: positiveInteger(10_485_760),
@@ -107,6 +125,75 @@ const envSchema = z
         path: ['AUTH_REFRESH_COOKIE_NAME'],
         message: 'cannot use the __Secure- prefix when AUTH_COOKIE_SECURE is false',
       });
+    }
+
+    if (value.NODE_ENV !== 'production') {
+      return;
+    }
+
+    if (!value.AUTH_COOKIE_SECURE) {
+      context.addIssue({
+        code: 'custom',
+        path: ['AUTH_COOKIE_SECURE'],
+        message: 'must be true in production',
+      });
+    }
+
+    if (!value.PUBLIC_ESTIMATE_BASE_URL.startsWith('https://')) {
+      context.addIssue({
+        code: 'custom',
+        path: ['PUBLIC_ESTIMATE_BASE_URL'],
+        message: 'must use HTTPS in production',
+      });
+    }
+
+    if (!value.CORS_ORIGINS.every((origin) => origin.startsWith('https://'))) {
+      context.addIssue({
+        code: 'custom',
+        path: ['CORS_ORIGINS'],
+        message: 'must contain only HTTPS origins in production',
+      });
+    }
+
+    if (!path.isAbsolute(value.MEDIA_LOCAL_ROOT)) {
+      context.addIssue({
+        code: 'custom',
+        path: ['MEDIA_LOCAL_ROOT'],
+        message: 'must be an absolute path in production',
+      });
+    }
+
+    const productionSecrets = productionSecretNames.map((name) => ({
+      name,
+      value: value[name],
+    }));
+
+    for (const secret of productionSecrets) {
+      if (
+        secret.value.length < 48 ||
+        obviouslyWeakSecretPattern.test(secret.value) ||
+        new Set(secret.value).size < 12
+      ) {
+        context.addIssue({
+          code: 'custom',
+          path: [secret.name],
+          message:
+            'must be a high-entropy production value of at least 48 characters',
+        });
+      }
+    }
+
+    if (
+      new Set(productionSecrets.map((secret) => secret.value)).size !==
+      productionSecrets.length
+    ) {
+      for (const secret of productionSecrets) {
+        context.addIssue({
+          code: 'custom',
+          path: [secret.name],
+          message: 'must be distinct from all other production secrets',
+        });
+      }
     }
   });
 

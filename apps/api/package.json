@@ -8,12 +8,19 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "platform:grant-admin": "tsx src/scripts/platform-grant-admin.ts",
+    "platform:revoke-admin": "tsx src/scripts/platform-revoke-admin.ts",
+    "user:reset-password": "tsx src/scripts/user-reset-password.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
+  "engines": {
+    "node": ">=24.7 <25",
+    "npm": ">=11 <12"
+  },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",
     "@fastify/cors": "^11.3.0",

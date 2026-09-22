@@ -1,0 +1,28 @@
+[Unit]
+Description=Evolqity Ops API
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=evolqity-ops
+Group=evolqity-ops
+WorkingDirectory=/var/www/evolqity-ops/current/apps/api
+EnvironmentFile=/etc/evolqity-ops/api.env
+ExecStart=/usr/bin/node dist/server.js
+
+Restart=on-failure
+RestartSec=5s
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+SyslogIdentifier=evolqity-ops-api
+
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/evolqity-ops/media
+
+[Install]
+WantedBy=multi-user.target

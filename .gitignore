@@ -5,5 +5,9 @@ dist/
 !.env.example
 coverage/
 *.log
+.data/
 .DS_Store
 Thumbs.db
+# Local migration backups / test output
+apps/api/.migration-manual-backup/
+apps/api/test-output.txt

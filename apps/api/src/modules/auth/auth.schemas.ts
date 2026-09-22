@@ -1,10 +1,14 @@
 import { z } from 'zod';
 
-const normalizedEmail = z
+export const normalizedEmailSchema = z
   .string()
   .trim()
   .transform((value) => value.toLowerCase())
   .pipe(z.email());
+
+export const initialPasswordSchema = z.string().min(10).max(128);
+
+export const requiredUserNameSchema = z.string().trim().min(1);
 
 const optionalTrimmedString = z
   .string()
@@ -13,8 +17,8 @@ const optionalTrimmedString = z
   .transform((value) => (value === '' ? undefined : value));
 
 export const registerBodySchema = z.object({
-  email: normalizedEmail,
-  password: z.string().min(10).max(128),
+  email: normalizedEmailSchema,
+  password: initialPasswordSchema,
   firstName: optionalTrimmedString,
   lastName: optionalTrimmedString,
   organizationName: z.string().trim().min(2),
@@ -29,7 +33,7 @@ export const registerBodySchema = z.object({
 export type RegisterBody = z.infer<typeof registerBodySchema>;
 
 export const loginBodySchema = z.object({
-  email: normalizedEmail,
+  email: normalizedEmailSchema,
   password: z.string().min(1).max(128),
 });
 

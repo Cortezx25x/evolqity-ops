@@ -1,0 +1,171 @@
+.platform-shell .platform-sidebar {
+  border-right-color: #829ab1;
+}
+
+.app-nav-link--secondary {
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
+}
+
+.platform-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.platform-result-count {
+  margin: 0;
+  font-size: 0.92rem;
+  align-self: flex-end;
+}
+
+.platform-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.platform-org-table {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.platform-org-table-head {
+  display: none;
+}
+
+.platform-org-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.platform-org-card {
+  border: 1px solid #d9e2ec;
+  border-radius: 0.75rem;
+  background: #fff;
+  padding: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.platform-org-row {
+  grid-template-columns: 1fr;
+}
+
+.platform-org-cell h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #102a43;
+}
+
+.platform-org-cell-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #829ab1;
+  margin-bottom: 0.15rem;
+}
+
+.platform-org-cell p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #52606d;
+}
+
+.platform-org-owner-name {
+  color: #243b53 !important;
+  font-weight: 500;
+}
+
+.platform-org-owner-email {
+  font-size: 0.88rem !important;
+  word-break: break-word;
+}
+
+.platform-org-cell--status .status-badge {
+  align-self: flex-start;
+}
+
+.platform-org-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.platform-edit-org-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.platform-edit-org-context {
+  margin: 0;
+  display: grid;
+  gap: 0.65rem;
+  font-size: 0.92rem;
+}
+
+.platform-edit-org-context div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.platform-edit-org-context dt {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #829ab1;
+}
+
+.platform-edit-org-context dd {
+  margin: 0;
+  color: #52606d;
+}
+
+@media (min-width: 960px) {
+  .platform-org-table-head {
+    display: grid;
+    grid-template-columns: minmax(10rem, 1.6fr) minmax(8rem, 1.35fr) 5.5rem 6.5rem 5.5rem minmax(
+        11rem,
+        1.35fr
+      );
+    gap: 0.75rem;
+    padding: 0 1rem 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #829ab1;
+  }
+
+  .platform-org-row {
+    grid-template-columns: minmax(10rem, 1.6fr) minmax(8rem, 1.35fr) 5.5rem 6.5rem 5.5rem minmax(
+        11rem,
+        1.35fr
+      );
+    align-items: start;
+    gap: 0.75rem;
+  }
+
+  .platform-org-cell-label {
+    display: none;
+  }
+
+  .platform-org-cell--name h2 {
+    font-size: 1rem;
+  }
+
+  .platform-org-cell--actions {
+    justify-content: flex-end;
+  }
+}

@@ -13,6 +13,10 @@ enum OrganizationRole {
   MEMBER
 }
 
+enum PlatformRole {
+  PLATFORM_ADMIN
+}
+
 enum CustomerType {
   PERSON
   COMPANY
@@ -68,6 +72,11 @@ enum EstimateItemType {
   OTHER
 }
 
+enum PublicEstimateDecision {
+  APPROVED
+  REJECTED
+}
+
 model Organization {
   id                  String   @id @default(uuid()) @db.Uuid
   name                String
@@ -84,19 +93,21 @@ model Organization {
   assets      Asset[]
   workOrders  WorkOrder[]
   inspections Inspection[]
-  media       Media[]
-  estimates   Estimate[]
+  media                 Media[]
+  estimates             Estimate[]
+  estimatePublicTokens  EstimatePublicToken[]
 }
 
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  email        String   @unique
+  id           String        @id @default(uuid()) @db.Uuid
+  email        String        @unique
   firstName    String?
   lastName     String?
   passwordHash String?
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  platformRole PlatformRole?
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   organizations OrganizationUser[] @relation("UserMemberships")
   sessions      AuthSession[]
@@ -118,10 +129,12 @@ model OrganizationUser {
   createdWorkOrders    WorkOrder[]  @relation("WorkOrderCreator")
   createdInspections   Inspection[] @relation("InspectionCreator")
   completedInspections Inspection[] @relation("InspectionCompleter")
-  uploadedMedia        Media[]      @relation("MediaUploader")
-  createdEstimates     Estimate[]   @relation("EstimateCreator")
+  uploadedMedia            Media[]               @relation("MediaUploader")
+  createdEstimates         Estimate[]            @relation("EstimateCreator")
+  createdEstimatePublicTokens EstimatePublicToken[] @relation("EstimatePublicTokenCreator")
 
   @@unique([organizationId, userId])
+  @@unique([id, organizationId])
   @@index([organizationId])
   @@index([userId])
 }
@@ -285,10 +298,12 @@ model Estimate {
 
   organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   workOrder    WorkOrder        @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
-  createdBy    OrganizationUser @relation("EstimateCreator", fields: [createdByMembershipId], references: [id], onDelete: Restrict)
-  items        EstimateItem[]
+  createdBy            OrganizationUser      @relation("EstimateCreator", fields: [createdByMembershipId], references: [id], onDelete: Restrict)
+  items                EstimateItem[]
+  publicEstimateTokens EstimatePublicToken[]
 
   @@unique([organizationId, number])
+  @@unique([id, organizationId])
   @@index([organizationId, workOrderId])
   @@index([organizationId, status])
   @@index([organizationId, createdAt])
@@ -360,6 +375,31 @@ model AuthSession {
   refreshTokens RefreshToken[]
 
   @@index([userId, revokedAt])
+  @@index([expiresAt])
+}
+
+model EstimatePublicToken {
+  id                    String                  @id @default(uuid()) @db.Uuid
+  organizationId        String                  @db.Uuid
+  estimateId            String                  @db.Uuid
+  secretHash            Bytes                   @unique
+  expiresAt             DateTime
+  revokedAt             DateTime?
+  revokedReason         String?
+  decision              PublicEstimateDecision?
+  decidedAt             DateTime?
+  responderName         String?
+  rejectionReason       String?
+  createdByMembershipId String                  @db.Uuid
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  estimate     Estimate         @relation(fields: [estimateId, organizationId], references: [id, organizationId], onDelete: Cascade)
+  createdBy    OrganizationUser @relation("EstimatePublicTokenCreator", fields: [createdByMembershipId, organizationId], references: [id, organizationId], onDelete: Restrict)
+
+  @@index([organizationId, estimateId])
+  @@index([estimateId, revokedAt])
   @@index([expiresAt])
 }
 

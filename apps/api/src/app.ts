@@ -12,14 +12,17 @@ import { registerAssetRoutes } from './modules/assets/asset.routes.js';
 import { registerAuthRoutes } from './modules/auth/auth.routes.js';
 import { registerCustomerRoutes } from './modules/customers/customer.routes.js';
 import { registerEstimateRoutes } from './modules/estimates/estimate.routes.js';
+import { registerPublicEstimateRoutes } from './modules/public-estimates/public-estimate.routes.js';
 import { registerInspectionRoutes } from './modules/inspections/inspection.routes.js';
 import { registerMediaRoutes } from './modules/media/media.routes.js';
 import { registerOrganizationUserRoutes } from './modules/organization-users/organization-user.routes.js';
 import { registerOrganizationRoutes } from './modules/organizations/organization.routes.js';
+import { registerPlatformRoutes } from './modules/platform/platform.routes.js';
 import { registerUserRoutes } from './modules/users/user.routes.js';
 import { registerWorkOrderRoutes } from './modules/work-orders/work-order.routes.js';
 import { registerAuthenticationPlugin } from './plugins/authentication.js';
 import { registerOrganizationContextPlugin } from './plugins/organization-context.js';
+import { registerPlatformAdminPlugin } from './plugins/platform-admin.js';
 
 export interface BuildAppOptions {
   logger?: boolean;
@@ -108,6 +111,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   });
   await registerAuthenticationPlugin(app);
   await registerOrganizationContextPlugin(app);
+  await registerPlatformAdminPlugin(app);
 
   app.get('/api/health', async () => ({
     status: 'ok',
@@ -143,6 +147,8 @@ export async function buildApp(options: BuildAppOptions = {}) {
   await registerInspectionRoutes(app);
   await registerMediaRoutes(app);
   await registerEstimateRoutes(app);
+  await registerPublicEstimateRoutes(app);
+  await registerPlatformRoutes(app);
 
   return app;
 }

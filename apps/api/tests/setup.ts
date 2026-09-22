@@ -23,6 +23,13 @@ process.env.CORS_ORIGINS = 'http://localhost:5173';
 process.env.TRUST_PROXY = 'false';
 process.env.AUTH_LOGIN_RATE_LIMIT_MAX = '1000';
 process.env.AUTH_LOGIN_RATE_LIMIT_WINDOW_SECONDS = '60';
+process.env.PUBLIC_ESTIMATE_BASE_URL = 'http://localhost:5173/estimate';
+process.env.PUBLIC_ESTIMATE_TOKEN_PEPPER = randomBytes(48).toString('base64url');
+process.env.PUBLIC_ESTIMATE_TOKEN_TTL_DAYS = '30';
+process.env.PUBLIC_ESTIMATE_VIEW_RATE_LIMIT_MAX = '1000';
+process.env.PUBLIC_ESTIMATE_VIEW_RATE_LIMIT_WINDOW_SECONDS = '60';
+process.env.PUBLIC_ESTIMATE_DECISION_RATE_LIMIT_MAX = '1000';
+process.env.PUBLIC_ESTIMATE_DECISION_RATE_LIMIT_WINDOW_SECONDS = '60';
 process.env.MEDIA_STORAGE_DRIVER = 'local';
 process.env.MEDIA_LOCAL_ROOT = path.join(
   tmpdir(),

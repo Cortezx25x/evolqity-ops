@@ -54,6 +54,7 @@ export interface AuthOrganization {
 export interface AuthSessionResult {
   user: PublicAuthUser;
   organizations: AuthOrganization[];
+  platformRole: 'PLATFORM_ADMIN' | null;
   sessionId: string;
   sessionExpiresAt: Date;
   refreshToken: string;

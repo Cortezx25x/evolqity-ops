@@ -114,6 +114,12 @@ function mapMemberships(
   }));
 }
 
+function mapPlatformRole(
+  role: 'PLATFORM_ADMIN' | null | undefined,
+): 'PLATFORM_ADMIN' | null {
+  return role === 'PLATFORM_ADMIN' ? 'PLATFORM_ADMIN' : null;
+}
+
 export async function register(
   input: RegisterBody,
   metadata: AuthRequestMetadata,
@@ -163,6 +169,7 @@ export async function register(
       return {
         user,
         organizations: [{ ...organization, role: 'OWNER' }],
+        platformRole: null,
         ...session,
       };
     });
@@ -201,6 +208,7 @@ export async function login(
       where: { email: input.email },
       select: {
         ...publicAuthUserSelect,
+        platformRole: true,
         active: true,
         passwordHash: true,
         organizations: {
@@ -254,6 +262,7 @@ export async function login(
       lastName: user.lastName,
     },
     organizations: mapMemberships(user.organizations),
+    platformRole: mapPlatformRole(user.platformRole),
     ...session,
   };
 }
@@ -456,11 +465,13 @@ export async function validateAccessSession(
 export async function getCurrentUser(userId: string): Promise<{
   user: PublicAuthUser;
   organizations: AuthOrganization[];
+  platformRole: 'PLATFORM_ADMIN' | null;
 } | null> {
   const user = await prisma.user.findFirst({
     where: { id: userId, active: true },
     select: {
       ...publicAuthUserSelect,
+      platformRole: true,
       organizations: {
         where: {
           active: true,
@@ -495,6 +506,7 @@ export async function getCurrentUser(userId: string): Promise<{
       lastName: user.lastName,
     },
     organizations: mapMemberships(user.organizations),
+    platformRole: mapPlatformRole(user.platformRole),
   };
 }
 

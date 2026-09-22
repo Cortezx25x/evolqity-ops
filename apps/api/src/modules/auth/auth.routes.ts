@@ -53,6 +53,7 @@ function createSessionResponse(
     expiresIn: env.AUTH_ACCESS_TOKEN_TTL_SECONDS,
     user: session.user,
     organizations: session.organizations,
+    platformRole: session.platformRole,
   };
 }
 

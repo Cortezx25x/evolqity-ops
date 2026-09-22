@@ -1,122 +1,99 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-function App() {
-  const [count, setCount] = useState(0)
+import { AppLayout } from './components/layout/AppLayout';
+import { OrganizationGate } from './components/routing/OrganizationGate';
+import {
+  GuestRoute,
+  ProtectedRoute,
+  RequireOrganizationRole,
+  RequirePlatformAdmin,
+} from './components/routing/RouteGuards';
+import { PlatformLayout } from './components/layout/PlatformLayout';
+import { ORGANIZATION_TEAM_ROLES } from './lib/roles';
+import { AuthProvider } from './contexts/AuthContext';
+import { OrganizationProvider } from './contexts/OrganizationContext';
+import { CustomersPage } from './pages/CustomersPage';
+import { AssetsPage } from './pages/AssetsPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { LoginPage } from './pages/LoginPage';
+import PublicEstimatePage from './pages/PublicEstimatePage';
+import { PlatformOrganizationsPage } from './pages/PlatformOrganizationsPage';
+import { TeamPage } from './pages/TeamPage';
+import { WorkOrdersPage } from './pages/WorkOrdersPage';
+import { WorkOrderDetailPage } from './pages/WorkOrderDetailPage';
+import './styles/app.css';
+import './styles/responsive-lists.css';
 
+function NotFoundPage() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1>Página no encontrada</h1>
+        <p className="auth-subtitle">
+          La ruta solicitada no existe en Evolqity Ops.
+        </p>
+        <a className="app-button app-button--primary app-button--block" href="/">
+          Ir al inicio
+        </a>
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <AuthProvider>
+      <OrganizationProvider>
+        <Routes>
+          <Route path="/estimate" element={<PublicEstimatePage />} />
+
+          <Route element={<GuestRoute />}>
+            <Route path="/login" element={<LoginPage />} />
+          </Route>
+
+          <Route element={<ProtectedRoute />}>
+            <Route
+              path="/app/platform"
+              element={
+                <RequirePlatformAdmin>
+                  <PlatformLayout />
+                </RequirePlatformAdmin>
+              }
+            >
+              <Route
+                index
+                element={<Navigate to="organizations" replace />}
+              />
+              <Route
+                path="organizations"
+                element={<PlatformOrganizationsPage />}
+              />
+            </Route>
+
+            <Route element={<OrganizationGate />}>
+              <Route path="/app" element={<AppLayout />}>
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="customers" element={<CustomersPage />} />
+                <Route path="assets" element={<AssetsPage />} />
+                <Route path="work-orders/:workOrderId" element={<WorkOrderDetailPage />} />
+                <Route path="work-orders" element={<WorkOrdersPage />} />
+                <Route
+                  path="team"
+                  element={
+                    <RequireOrganizationRole roles={ORGANIZATION_TEAM_ROLES}>
+                      <TeamPage />
+                    </RequireOrganizationRole>
+                  }
+                />
+              </Route>
+            </Route>
+          </Route>
+
+          <Route path="/" element={<Navigate to="/app/dashboard" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </OrganizationProvider>
+    </AuthProvider>
+  );
+}

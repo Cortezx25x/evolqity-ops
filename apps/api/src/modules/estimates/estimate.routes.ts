@@ -30,6 +30,11 @@ import {
   updateEstimateItem,
   updateEstimateStatus,
 } from './estimate.service.js';
+import {
+  PublicEstimateAccessNotAllowedError,
+  issuePublicEstimateAccess,
+  revokePublicEstimateAccess,
+} from '../public-estimates/public-estimate.service.js';
 
 function knownEstimateError(error: unknown) {
   if (error instanceof EstimateWorkOrderNotFoundError) {
@@ -61,6 +66,12 @@ function knownEstimateError(error: unknown) {
   }
   if (error instanceof EstimateMoneyError) {
     return { statusCode: 400, message: 'Invalid monetary value' };
+  }
+  if (error instanceof PublicEstimateAccessNotAllowedError) {
+    return {
+      statusCode: 409,
+      message: 'Public estimate access is not allowed',
+    };
   }
 
   return null;
@@ -323,6 +334,68 @@ export async function registerEstimateRoutes(
             parsedBody.data,
           ),
         );
+      } catch (error) {
+        return sendEstimateError(request, reply, error);
+      }
+    },
+  );
+
+  app.post(
+    '/api/estimates/:id/public-access',
+    {
+      preHandler: [
+        ...tenantContext,
+        app.requireOrganizationRoles('OWNER', 'ADMIN'),
+      ],
+    },
+    async (request, reply) => {
+      const parsedParams = estimateIdParamsSchema.safeParse(request.params);
+      if (!parsedParams.success) {
+        return reply.code(400).send({ message: 'Invalid estimate id' });
+      }
+      if (request.organizationContext === null) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+
+      try {
+        const result = await issuePublicEstimateAccess(
+          request.organizationContext.organizationId,
+          parsedParams.data.id,
+          request.organizationContext.membershipId,
+        );
+        return reply
+          .header('Cache-Control', 'no-store')
+          .code(201)
+          .send(result);
+      } catch (error) {
+        return sendEstimateError(request, reply, error);
+      }
+    },
+  );
+
+  app.delete(
+    '/api/estimates/:id/public-access',
+    {
+      preHandler: [
+        ...tenantContext,
+        app.requireOrganizationRoles('OWNER', 'ADMIN'),
+      ],
+    },
+    async (request, reply) => {
+      const parsedParams = estimateIdParamsSchema.safeParse(request.params);
+      if (!parsedParams.success) {
+        return reply.code(400).send({ message: 'Invalid estimate id' });
+      }
+      if (request.organizationContext === null) {
+        return reply.code(403).send({ message: 'Forbidden' });
+      }
+
+      try {
+        await revokePublicEstimateAccess(
+          request.organizationContext.organizationId,
+          parsedParams.data.id,
+        );
+        return reply.code(204).send();
       } catch (error) {
         return sendEstimateError(request, reply, error);
       }
